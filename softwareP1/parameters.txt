@@ -1,0 +1,4 @@
+# Archivo de configuracion para el Problema de Asignacion con Restricciones (PAR)
+dataset=zoo_set.dat
+constraints=zoo_const_set_15.const
+seed=42
