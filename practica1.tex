@@ -14,7 +14,7 @@
 \usepackage[all]{xy}
 \usepackage{fancybox}
 \usepackage[latin1]{inputenc}	%acentos
-\usepackage[spanish]{babel}		%ordenes en espaÒol
+\usepackage[spanish]{babel}		%ordenes en espa√±ol
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{wasysym}
@@ -33,7 +33,7 @@
 \usepackage{hyperref}
 \hypersetup{colorlinks=true}
 
-\usepackage[spanish]{babel} %%Para notas a pie de p·gina
+\usepackage[spanish]{babel} %%Para notas a pie de p√°gina
 
 
 \usepackage{amsthm}
@@ -43,9 +43,9 @@
 
 \usepackage{mathtools}
 
-%\markright{Jorge GarcÌa G·miz}
+%\markright{Jorge Garc√≠a G√°miz}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% M·rgenes
+%% M√°rgenes
 \usepackage{geometry}
 \geometry{
 top=3cm,
@@ -54,17 +54,17 @@ left=3cm,
 right=3cm
 }
 
-%% Encabezados y pie de p·gina
+%% Encabezados y pie de p√°gina
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
 
 \lhead{}
-\rhead{MetaheurÌsticas - Pr·ctica 1}
+\rhead{Metaheur√≠sticas - Pr√°ctica 1}
 \renewcommand{\headrulewidth}{0.08pt}
 
 \lfoot{}
-\rfoot{Jorge GarcÌa G·miz - DGIIM}
+\rfoot{Jorge Garc√≠a G√°miz - DGIIM}
 \cfoot{\thepage}
 \renewcommand{\footrulewidth}{0.08pt}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
@@ -81,8 +81,8 @@ right=3cm
 	
 	\vfill
 	
-	{\textsc{\Huge Pr·ctica 1}}\\[0.4cm]
-	{\textsc{\large Pr·ctica 1: TÈcnicas de B˙squeda de Poblaciones para el Problema de AsignaciÛn con Restricciones (PAR)}}
+	{\textsc{\Huge Pr√°ctica 1}}\\[0.4cm]
+	{\textsc{\large Pr√°ctica 1: T√©cnicas de B√∫squeda de Poblaciones para el Problema de Asignaci√≥n con Restricciones (PAR)}}
 	
 	\vfill
 	
@@ -93,11 +93,11 @@ right=3cm
 	\end{figure}
 	
 	\vfill
-	{\huge{MetaheurÌsticas}}\\
+	{\huge{Metaheur√≠sticas}}\\
 	{Grupo A2: Viernes 15:30 - Curso 2025-2026}
 	
 	\vfill
-	{\huge{Jorge GarcÌa G·miz}} \\
+	{\huge{Jorge Garc√≠a G√°miz}} \\
 	{DNI: 77449859G} \\
 	{e-mail: jorgegarciag@correo.ugr.es}
 	
@@ -108,7 +108,7 @@ right=3cm
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-% ---------------- Õndice ----------------
+% ---------------- √çndice ----------------
 \newpage
 \pagestyle{fancy}
 \setcounter{page}{1}
@@ -126,35 +126,35 @@ right=3cm
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{DescripciÛn del Problema}
+\section{Descripci√≥n del Problema}
 
-\noindent El Problema de AsignaciÛn con Restricciones (PAR) es una generalizaciÛn del problema de agrupamiento cl·sico que busca particionar un conjunto de $n$ instancias en $k$ clusters disjuntos, donde cada instancia $\vec{x}_i \in \mathbb{R}^d$ tiene $d$ caracterÌsticas numÈricas. 
+\noindent El Problema de Asignaci√≥n con Restricciones (PAR) es una generalizaci√≥n del problema de agrupamiento cl√°sico que busca particionar un conjunto de $n$ instancias en $k$ clusters disjuntos, donde cada instancia $\vec{x}_i \in \mathbb{R}^d$ tiene $d$ caracter√≠sticas num√©ricas. 
 
-Adem·s, se dispone de una matriz de restricciones $R\in M_{n \times n}$, donde:
+Adem√°s, se dispone de una matriz de restricciones $R\in M_{n \times n}$, donde:
 \begin{itemize}
 	\item $R_{ij}=1$ es Must-Link (ML): $i$ y $j$ deben pertenecer al mismo cluster
 	\item $R_{ij}=-1$ es Cannot-Link (CL): $i$ y $j$ deben estar en distintos clusters
-	\item $R_{ij}=0$ indica ausencia de restricciÛn.
+	\item $R_{ij}=0$ indica ausencia de restricci√≥n.
 \end{itemize}
 
-Una soluciÛn se representa como un vector de asignaciÛn $s = (s_1, ..., s_n)$ con $s_i \in \{0, ..., k-1\}$ asigna cada instancia a un cluster.
+Una soluci√≥n se representa como un vector de asignaci√≥n $s = (s_1, ..., s_n)$ con $s_i \in \{0, ..., k-1\}$ asigna cada instancia a un cluster.
 
 
 \vspace{0.3cm}
-\noindent\textbf{FunciÛn Objetivo}
+\noindent\textbf{Funci√≥n Objetivo}
 
-El objetivo es obtener una particiÛn soluciÛn que permita minimizar la funciÛn fitness definida como:
+El objetivo es obtener una partici√≥n soluci√≥n que permita minimizar la funci√≥n fitness definida como:
 
 \begin{equation}\label{fitness_eq}
 	fitness(s) = desviacion(s) + \lambda \cdot infeasibility(s),
 \end{equation}
-donde el par·metro $\lambda= \frac{\max_{i,j} \|\vec{x}_i - \vec{x}_j\|}{R} \in[0,1[$ equilibra ambos tÈrminos ($R$ es el n˙mero de restricciones).
+donde el par√°metro $\lambda= \frac{\max_{i,j} \|\vec{x}_i - \vec{x}_j\|}{R} \in[0,1[$ equilibra ambos t√©rminos ($R$ es el n√∫mero de restricciones).
 
 
 \vspace{0.3cm}
-\noindent\textbf{DesviaciÛn}
+\noindent\textbf{Desviaci√≥n}
 
-La calidad del clustering se mide mediante la desviaciÛn general. Primero se calculan los centroides. Para cada cluster $C_i$, con $i\in\{0,\dotsc, k-1\}$, su centroide es:
+La calidad del clustering se mide mediante la desviaci√≥n general. Primero se calculan los centroides. Para cada cluster $C_i$, con $i\in\{0,\dotsc, k-1\}$, su centroide es:
 \begin{equation*}
 	\vec{\mu}_i = \frac{1}{|C_i|} \sum_{\vec{x}_j \in C_i} \vec{x}_j
 \end{equation*}
@@ -164,7 +164,7 @@ Luego la distancia media intra-cluster, que es la media de las distancias de las
 	dist_{intra-cluster}(C_i) = \frac{1}{|C_i|} \sum_{\vec{x}_j \in C_i} \|\vec{x}_j - \vec{\mu}_i\|
 \end{equation*}
 
-Definimos la desviaciÛn general de la particiÛn en clusters $C = \{C_1,\dotsc, C_k\}$ como la media de las desviaciones intra-cluster de cada cluster:
+Definimos la desviaci√≥n general de la partici√≥n en clusters $C = \{C_1,\dotsc, C_k\}$ como la media de las desviaciones intra-cluster de cada cluster:
 \begin{equation*}
 	desviacion(C) = \frac{1}{k} \sum_{i=1}^{k} dist_{intra-cluster}(C_i)
 \end{equation*}
@@ -172,7 +172,7 @@ Definimos la desviaciÛn general de la particiÛn en clusters $C = \{C_1,\dotsc, C
 \vspace{0.1cm}
 \noindent\textbf{Infeasability}
 
-La ``infeasability'' cuenta el n˙mero de restricciones violadas:
+La ``infeasability'' cuenta el n√∫mero de restricciones violadas:
 \begin{equation*}
 	infeasibility = \sum_{(i,j) \in ML} [s_i \neq s_j] + \sum_{(i,j) \in CL} [s_i = s_j]
 \end{equation*}
@@ -181,46 +181,46 @@ La ``infeasability'' cuenta el n˙mero de restricciones violadas:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
-\section{AplicaciÛn de los algoritmos al problema}
+\section{Aplicaci√≥n de los algoritmos al problema}
 
-\noindent Para la resoluciÛn del problema de AsignaciÛn con Restricciones (PAR), hemos implementado tres algoritmos distintos: B˙squeda Aleatoria (Random Search), B˙squeda Greedy y B˙squeda Local. Todos ellos comparten una estructura com˙n, heredada de la clase \texttt{MH}, que ˙nicamente incluye un constructor y un destructor por defecto y el mÈtodo \texttt{optimize}, el cual recibe como par·metros el problema que van a estudiar y el n˙mero m·ximo de evaluaciones antes de parar la ejecuciÛn del algoritmo. Este es el mÈtodo que se llamar· desde el main para estudiar cÛmo se comporta cada algoritmo a la hora de resolver el problema.
+\noindent Para la resoluci√≥n del problema de Asignaci√≥n con Restricciones (PAR), hemos implementado tres algoritmos distintos: B√∫squeda Aleatoria (Random Search), B√∫squeda Greedy y B√∫squeda Local. Todos ellos comparten una estructura com√∫n, heredada de la clase \texttt{MH}, que √∫nicamente incluye un constructor y un destructor por defecto y el m√©todo \texttt{optimize}, el cual recibe como par√°metros el problema que van a estudiar y el n√∫mero m√°ximo de evaluaciones antes de parar la ejecuci√≥n del algoritmo. Este es el m√©todo que se llamar√° desde el main para estudiar c√≥mo se comporta cada algoritmo a la hora de resolver el problema.
 
-Los tres algoritmos implementados comparten una misma estructura b·sica de representaciÛn de soluciones y evaluaciÛn de la funciÛn objetivo. En esta secciÛn se describen los elementos comunes a todos los mÈtodos: la representaciÛn de soluciones, la generaciÛn de soluciones iniciales y el c·lculo del fitness.
+Los tres algoritmos implementados comparten una misma estructura b√°sica de representaci√≥n de soluciones y evaluaci√≥n de la funci√≥n objetivo. En esta secci√≥n se describen los elementos comunes a todos los m√©todos: la representaci√≥n de soluciones, la generaci√≥n de soluciones iniciales y el c√°lculo del fitness.
 
-\subsection{RepresentaciÛn del problema}
+\subsection{Representaci√≥n del problema}
 
-El problema se encapsula en la clase \texttt{ProblemPAR}, encargada de almacenar los datos de la instancia y proporcionar los mÈtodos necesarios para evaluar soluciones. Esta clase mantiene como atributos principales:
+El problema se encapsula en la clase \texttt{ProblemPAR}, encargada de almacenar los datos de la instancia y proporcionar los m√©todos necesarios para evaluar soluciones. Esta clase mantiene como atributos principales:
 
 \begin{itemize}
-	\item \texttt{features}: matriz que contiene las caracterÌsticas de cada instancia del conjunto de datos.
+	\item \texttt{features}: matriz que contiene las caracter√≠sticas de cada instancia del conjunto de datos.
 	\item \texttt{constraints}: matriz de restricciones que indica las relaciones Must-Link y Cannot-Link entre pares de instancias.
-	\item \texttt{num\_clusters}: n˙mero de clusters en los que se debe dividir el conjunto de instancias.
-	\item \texttt{lambda}: par·metro de penalizaciÛn utilizado en la funciÛn objetivo.
+	\item \texttt{num\_clusters}: n√∫mero de clusters en los que se debe dividir el conjunto de instancias.
+	\item \texttt{lambda}: par√°metro de penalizaci√≥n utilizado en la funci√≥n objetivo.
 \end{itemize}
 
-Durante la construcciÛn del problema se leen los datos desde fichero y se calcula autom·ticamente el valor de $\lambda$ seg˙n la expresiÛn definida en la secciÛn anterior.
+Durante la construcci√≥n del problema se leen los datos desde fichero y se calcula autom√°ticamente el valor de $\lambda$ seg√∫n la expresi√≥n definida en la secci√≥n anterior.
 
-\subsection{RepresentaciÛn de las soluciones}
+\subsection{Representaci√≥n de las soluciones}
 
-Una soluciÛn candidata se representa mediante una estructura \texttt{tSolution<int>}, que, como ya describimos en la secciÛn anterior, en nuestra implementaciÛn corresponde a un vector de enteros donde cada posiciÛn $i$ indica el identificador del cluster al que pertenece la instancia $i$. Por tanto:
+Una soluci√≥n candidata se representa mediante una estructura \texttt{tSolution<int>}, que, como ya describimos en la secci√≥n anterior, en nuestra implementaci√≥n corresponde a un vector de enteros donde cada posici√≥n $i$ indica el identificador del cluster al que pertenece la instancia $i$. Por tanto:
 
 \[
 s = (s_1, s_2, ..., s_n), \quad s_i \in \{0,\dots,k-1\}
 \]
-donde $k$ es el n˙mero total de clusters.
+donde $k$ es el n√∫mero total de clusters.
 
-Esta representaciÛn permite modificar f·cilmente la asignaciÛn de cualquier instancia a otro cluster, lo cual es fundamental para los algoritmos de b˙squeda utilizados.
+Esta representaci√≥n permite modificar f√°cilmente la asignaci√≥n de cualquier instancia a otro cluster, lo cual es fundamental para los algoritmos de b√∫squeda utilizados.
 
-\subsection{GeneraciÛn de soluciones iniciales}
+\subsection{Generaci√≥n de soluciones iniciales}
 
-Los algoritmos que requieren una soluciÛn inicial utilizan el mÈtodo \texttt{createSolution}, que genera una asignaciÛn aleatoria de instancias a clusters. El procedimiento consiste simplemente en asignar a cada instancia un cluster elegido de forma uniforme dentro del dominio permitido.
+Los algoritmos que requieren una soluci√≥n inicial utilizan el m√©todo \texttt{createSolution}, que genera una asignaci√≥n aleatoria de instancias a clusters. El procedimiento consiste simplemente en asignar a cada instancia un cluster elegido de forma uniforme dentro del dominio permitido.
 
-El pseudocÛdigo del procedimiento es el siguiente:
+El pseudoc√≥digo del procedimiento es el siguiente:
 
 \begin{verbatim}
 createSolution()
-	n <- n˙mero de instancias
-	solucion <- vector de tamaÒo n
+	n <- n√∫mero de instancias
+	solucion <- vector de tama√±o n
 	
 	para i desde 0 hasta n-1 hacer
 			solucion[i] <- valor aleatorio en [0, k-1]
@@ -228,11 +228,11 @@ createSolution()
 	devolver solucion
 \end{verbatim}
 
-Este mÈtodo permite generar r·pidamente soluciones iniciales diversas que pueden ser utilizadas por los distintos algoritmos de b˙squeda.
+Este m√©todo permite generar r√°pidamente soluciones iniciales diversas que pueden ser utilizadas por los distintos algoritmos de b√∫squeda.
 
-\subsection{C·lculo de centroides}
+\subsection{C√°lculo de centroides}
 
-Para evaluar la calidad de una soluciÛn es necesario calcular los centroides de los clusters definidos por dicha soluciÛn. El procedimiento utilizado es el siguiente:
+Para evaluar la calidad de una soluci√≥n es necesario calcular los centroides de los clusters definidos por dicha soluci√≥n. El procedimiento utilizado es el siguiente:
 
 \begin{verbatim}
 calculateCentroids(solution)
@@ -250,11 +250,11 @@ calculateCentroids(solution)
 	
 	devolver centroides
 \end{verbatim}
-donde $d$ representa el n˙mero de caracterÌsticas de cada instancia.
+donde $d$ representa el n√∫mero de caracter√≠sticas de cada instancia.
 
-\subsection{C·lculo de la desviaciÛn}
+\subsection{C√°lculo de la desviaci√≥n}
 
-Una vez obtenidos los centroides, se calcula la desviaciÛn media intra-cluster de cada cluster y posteriormente la desviaciÛn global de la particiÛn.
+Una vez obtenidos los centroides, se calcula la desviaci√≥n media intra-cluster de cada cluster y posteriormente la desviaci√≥n global de la partici√≥n.
 
 \begin{verbatim}
 calculateDeviation(solution)
@@ -278,11 +278,11 @@ calculateDeviation(solution)
 	devolver media(desviacion_cluster)
 \end{verbatim}
 
-Si alg˙n cluster queda vacÌo, se aplica una penalizaciÛn elevada (999999.0) para evitar que este tipo de soluciones sea favorecido por los algoritmos de b˙squeda.
+Si alg√∫n cluster queda vac√≠o, se aplica una penalizaci√≥n elevada (999999.0) para evitar que este tipo de soluciones sea favorecido por los algoritmos de b√∫squeda.
 
-\subsection{C·lculo de infeasibility}
+\subsection{C√°lculo de infeasibility}
 
-El tÈrmino de infeasibility mide el n˙mero de restricciones violadas por una soluciÛn. Para ello se recorren todos los pares de instancias y se comprueba si la asignaciÛn de clusters respeta las restricciones Must-Link y Cannot-Link.
+El t√©rmino de infeasibility mide el n√∫mero de restricciones violadas por una soluci√≥n. Para ello se recorren todos los pares de instancias y se comprueba si la asignaci√≥n de clusters respeta las restricciones Must-Link y Cannot-Link.
 
 \begin{verbatim}
 calculateInfeasibility(solution)
@@ -298,9 +298,9 @@ calculateInfeasibility(solution)
 	devolver infeasibility
 \end{verbatim}
 
-\subsection{FunciÛn de evaluaciÛn}
+\subsection{Funci√≥n objetivo}
 
-Finalmente, el valor de fitness de una soluciÛn se calcula (vÈase EcuaciÛn \eqref{fitness_eq}) combinando la desviaciÛn intra-cluster y el n˙mero de restricciones violadas mediante el par·metro $\lambda$ descrito anteriormente. AsÌ se refleja en el cÛdigo:
+Finalmente, el valor de fitness de una soluci√≥n se calcula (v√©ase Ecuaci√≥n \eqref{fitness_eq}) combinando la desviaci√≥n intra-cluster y el n√∫mero de restricciones violadas mediante el par√°metro $\lambda$ descrito anteriormente. As√≠ se refleja en el c√≥digo:
 
 \begin{verbatim}
 fitness(solution)
@@ -311,24 +311,24 @@ fitness(solution)
 	devolver desviacion + lambda * infeas
 \end{verbatim}
 
-Esta funciÛn permite equilibrar la calidad del agrupamiento con el grado de cumplimiento de las restricciones, penalizando aquellas soluciones que violan un mayor n˙mero de ellas.
+Esta funci√≥n permite equilibrar la calidad del agrupamiento con el grado de cumplimiento de las restricciones, penalizando aquellas soluciones que violan un mayor n√∫mero de ellas.
 
-Los tres algoritmos implementados utilizan esta misma funciÛn de evaluaciÛn para comparar soluciones y guiar el proceso de b˙squeda.
+Los tres algoritmos implementados utilizan esta misma funci√≥n de evaluaci√≥n para comparar soluciones y guiar el proceso de b√∫squeda.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
 \section{Estructura de los algoritmos}
 
-\noindent En esta secciÛn se describen los algoritmos utilizados para resolver el problema. En todos los casos los mÈtodos devuelven una estructura \texttt{ResultMH}, que contiene la mejor soluciÛn encontrada, su valor de fitness y el n˙mero de evaluaciones realizadas.
+\noindent En esta secci√≥n se describen los algoritmos utilizados para resolver el problema. En todos los casos los m√©todos devuelven una estructura \texttt{ResultMH}, que contiene la mejor soluci√≥n encontrada, su valor de fitness y el n√∫mero de evaluaciones realizadas.
 
-\subsection{B˙squeda Aleatoria (Random Search)}
+\subsection{B√∫squeda Aleatoria (Random Search)}
 
-El algoritmo Random Search constituye un mÈtodo de referencia muy sencillo que consiste en generar soluciones completamente aleatorias y conservar la mejor encontrada.
+El algoritmo Random Search constituye un m√©todo de referencia muy sencillo que consiste en generar soluciones completamente aleatorias y conservar la mejor encontrada.
 
-En cada iteraciÛn se genera una soluciÛn mediante el mÈtodo \texttt{createSolution} definido en el problema y se eval˙a mediante la funciÛn \texttt{fitness}. Si la nueva soluciÛn mejora a la mejor encontrada hasta el momento, se actualiza.
+En cada iteraci√≥n se genera una soluci√≥n mediante el m√©todo \texttt{createSolution} definido en el problema y se eval√∫a mediante la funci√≥n \texttt{fitness}. Si la nueva soluci√≥n mejora a la mejor encontrada hasta el momento, se actualiza.
 
-El proceso contin˙a hasta alcanzar el n˙mero m·ximo de evaluaciones permitido.
+El proceso contin√∫a hasta alcanzar el n√∫mero m√°ximo de evaluaciones permitido.
 
 \begin{verbatim}
 RandomSearch(problem, maxevals)
@@ -350,25 +350,25 @@ RandomSearch(problem, maxevals)
 	devolver (best_solution, best_fitness, evaluations)
 \end{verbatim}
 
-Este algoritmo no realiza ninguna explotaciÛn del espacio de b˙squeda, pero sirve como referencia para comparar el rendimiento de los mÈtodos m·s sofisticados.
+Este algoritmo no realiza ninguna explotaci√≥n del espacio de b√∫squeda, pero sirve como referencia para comparar el rendimiento de los m√©todos m√°s sofisticados.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Algoritmo Greedy}
 
-Los algoritmos greedy se caracterizan por tomar decisiones basadas ˙nicamente en la informaciÛn disponible en el estado actual, seleccionando en cada paso la alternativa que parece m·s prometedora seg˙n un criterio heurÌstico.
+Los algoritmos greedy se caracterizan por tomar decisiones basadas √∫nicamente en la informaci√≥n disponible en el estado actual, seleccionando en cada paso la alternativa que parece m√°s prometedora seg√∫n un criterio heur√≠stico.
 
-En nuestro caso, el algoritmo greedy implementado sigue una estrategia similar al algoritmo \textit{k-means}, adaptada para tener en cuenta las restricciones del problema. En lugar de optimizar directamente la funciÛn fitness global, el algoritmo construye iterativamente una particiÛn de las instancias asignando cada una al cluster que minimiza una heurÌstica local basada en dos criterios: el n˙mero de restricciones violadas al realizar la asignaciÛn y la distancia euclÌdea al centroide del cluster.
+En nuestro caso, el algoritmo greedy implementado sigue una estrategia similar al algoritmo \textit{k-means}, adaptada para tener en cuenta las restricciones del problema. En lugar de optimizar directamente la funci√≥n fitness global, el algoritmo construye iterativamente una partici√≥n de las instancias asignando cada una al cluster que minimiza una heur√≠stica local basada en dos criterios: el n√∫mero de restricciones violadas al realizar la asignaci√≥n y la distancia eucl√≠dea al centroide del cluster.
 
-El algoritmo comienza generando $k$ centroides iniciales aleatorios dentro del dominio de cada caracterÌstica del conjunto de datos. A partir de estos centroides iniciales, las instancias se asignan iterativamente a los clusters utilizando la funciÛn heurÌstica descrita m·s adelante. Tras cada iteraciÛn se recalculan los centroides como la media de las instancias asignadas a cada cluster.
+El algoritmo comienza generando $k$ centroides iniciales aleatorios dentro del dominio de cada caracter√≠stica del conjunto de datos. A partir de estos centroides iniciales, las instancias se asignan iterativamente a los clusters utilizando la funci√≥n heur√≠stica descrita m√°s adelante. Tras cada iteraci√≥n se recalculan los centroides como la media de las instancias asignadas a cada cluster.
 
 El proceso se repite recalculando los centroides hasta que ninguna instancia cambia de cluster.
 
 \subsubsection{Esquema general del algoritmo}
 
 \begin{verbatim}
-Greedy(problem)
+Greedy(problem, maxevals)
 	
-	calcular el dominio de cada caracterÌstica
+	calcular el dominio de cada caracter√≠stica
 	generar k centroides aleatorios dentro del dominio
 	
 	inicializar solucion con valores -1
@@ -398,16 +398,16 @@ Greedy(problem)
 	devolver solucion
 \end{verbatim}
 
-\subsubsection{FunciÛn heurÌstica}
+\subsubsection{Funci√≥n heur√≠stica}
 
-Para decidir a quÈ cluster asignar cada instancia se utiliza una funciÛn heurÌstica que considera dos factores:
+Para decidir a qu√© cluster asignar cada instancia se utiliza una funci√≥n heur√≠stica que considera dos factores:
 
 \begin{itemize}
-	\item N˙mero de restricciones violadas al asignar la instancia al cluster.
-	\item Distancia euclÌdea al centroide del cluster.
+	\item N√∫mero de restricciones violadas al asignar la instancia al cluster.
+	\item Distancia eucl√≠dea al centroide del cluster.
 \end{itemize}
 
-El criterio principal es minimizar el n˙mero de violaciones de restricciones, utilizando la distancia ˙nicamente como criterio de desempate.
+El criterio principal es minimizar el n√∫mero de violaciones de restricciones, utilizando la distancia √∫nicamente como criterio de desempate.
 
 \begin{verbatim}
 heuristica(instancia i, cluster c)
@@ -425,107 +425,126 @@ heuristica(instancia i, cluster c)
 	devolver (violations, dist)
 \end{verbatim}
 
-La comparaciÛn entre clusters se realiza priorizando el menor n˙mero de violaciones y, en caso de empate, la menor distancia al centroide.
+La comparaci√≥n entre clusters se realiza priorizando el menor n√∫mero de violaciones y, en caso de empate, la menor distancia al centroide.
 
-Finalmente, cuando el algoritmo converge, la soluciÛn obtenida se eval˙a mediante la funciÛn fitness definida anteriormente para obtener su valor final.
+Finalmente, cuando el algoritmo converge, la soluci√≥n obtenida se eval√∫a mediante la funci√≥n fitness definida anteriormente para obtener su valor final.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{B˙squeda Local}
+\subsection{B√∫squeda Local}
 
-La B˙squeda Local parte de una soluciÛn inicial aleatoria y explora su entorno buscando mejoras iterativas en el valor de fitness.
+La B√∫squeda Local es un algoritmo de mejora iterativa que parte de una soluci√≥n inicial y explora su entorno\footnote{formado por todas aquellas soluciones que se obtienen moviendo una instancia de su cluster actual a otro distinto} en busca de soluciones con mejor valor de la funci√≥n objetivo. El proceso contin√∫a mientras se encuentren mejoras y no se supere el n√∫mero m√°ximo de evaluaciones permitido.
 
-El entorno de una soluciÛn est· formado por todas aquellas soluciones que se obtienen moviendo una instancia de su cluster actual a otro distinto.
+En nuestro caso el algoritmo utiliza una estrategia de exploraci√≥n \textit{primer mejor}. Esto significa que el entorno de la soluci√≥n actual se recorre hasta encontrar el primer vecino que mejora el valor de la funci√≥n objetivo, acept√°ndose inmediatamente como nueva soluci√≥n. A partir de esa nueva soluci√≥n se vuelve a generar y explorar su entorno.
 
-Para evitar generar soluciones inv·lidas, se impone la restricciÛn adicional de no permitir movimientos que dejen un cluster vacÌo.
 
-\subsubsection{Esquema general del algoritmo}
+\subsubsection{Operador de generaci√≥n de vecino}
 
-\begin{verbatim}
-	LocalSearch(problem, maxevals)
-	
-	solution ? generar solucion inicial aleatoria
-	fitness ? fitness(solution)
-	evaluations ? 1
-	improvement ? true
-	
-	mientras improvement y evaluations < maxevals hacer
-	
-	improvement ? false
-	generar lista de movimientos (instancia, cluster)
-	barajar lista
-	
-	para cada movimiento m hacer
-	
-	neighbor ? aplicar movimiento(solution, m)
-	neighbor_fitness ? fitness(neighbor)
-	
-	evaluations++
-	
-	si neighbor_fitness < fitness entonces
-	solution ? neighbor
-	fitness ? neighbor_fitness
-	improvement ? true
-	salir del bucle
-	
-	devolver solution
-\end{verbatim}
+El operador de generaci√≥n de vecinos consiste en seleccionar una instancia y moverla a un cluster distinto. Formalmente, dado un vector soluci√≥n $ s = (s_1, \dots, s_n)$, se selecciona una instancia $i$ y se modifica su asignaci√≥n a un cluster distinto $l$, quedando $s' = (s_1, \dots, l, \dots, s_n)$
 
-\subsubsection{Operador de generaciÛn de vecino}
+Para evitar generar soluciones inv√°lidas, se impone la restricci√≥n adicional de no permitir movimientos que dejen un cluster vac√≠o.
 
-El operador de generaciÛn de vecinos consiste en seleccionar una instancia y moverla a un cluster distinto.
+\subsubsection{Exploraci√≥n del entorno}
+
+El entorno de una soluci√≥n $s$ est√° formado por todas las soluciones que pueden generarse aplicando el operador anterior a cada una de las instancias y a todos los clusters distintos del actual. Por tanto, si el problema tiene $n$ instancias y $k$ clusters, el tama√±o m√°ximo del entorno es $n(k-1)$.
+
+La exploraci√≥n del entorno no se realiza en un orden determinista, sino en un orden aleatorio. Esto introduce diversidad en la b√∫squeda y evita sesgos sistem√°ticos en la exploraci√≥n del espacio de soluciones.
+
+En la implementaci√≥n se genera expl√≠citamente el conjunto de movimientos posibles $(i,l)$ y posteriormente se barajan aleatoriamente antes de comenzar la exploraci√≥n.
 
 \begin{verbatim}
-	generarVecino(solution, instancia i, cluster c)
+generarEntorno(solucion)
 	
-	neighbor ? copia de solution
-	neighbor[i] ? c
+	entorno <- lista vac√≠a
 	
-	devolver neighbor
-\end{verbatim}
-
-No se permite aplicar el movimiento si al retirar la instancia de su cluster original Èste quedarÌa vacÌo.
-
-\subsubsection{ExploraciÛn del entorno}
-
-El entorno se explora generando todas las posibles combinaciones de instancia y cluster distinto del actual. Estas combinaciones se barajan aleatoriamente para evitar sesgos en el orden de exploraciÛn.
-
-La estrategia utilizada es \textit{First Improvement}: en cuanto se encuentra un vecino con mejor fitness que la soluciÛn actual, se acepta inmediatamente y se vuelve a generar el entorno desde la nueva soluciÛn.
-
-\begin{verbatim}
-	explorarEntorno(solution)
+	para i desde 1 hasta n hacer
+			para l desde 0 hasta k-1 hacer
+					si l != solucion[i]
+							a√±adir (i,l) a entorno
 	
-	entorno ? lista vacÌa
-	
-	para cada instancia i hacer
-	para cada cluster c hacer
-	si c ? solution[i]
-	aÒadir (i,c) a entorno
-	
-	barajar entorno
+	barajar(entorno)
 	
 	devolver entorno
 \end{verbatim}
 
-\subsubsection{GeneraciÛn de soluciÛn inicial}
+La estrategia utilizada es \textit{primer mejor}: en cuanto se encuentra un vecino con mejor fitness que la soluci√≥n actual, se acepta inmediatamente y se vuelve a generar el entorno desde la nueva soluci√≥n.
 
-La soluciÛn inicial se genera aleatoriamente asegurando que todos los clusters contengan al menos una instancia.
+\subsubsection{Generaci√≥n de soluci√≥n inicial}
+
+La b√∫squeda comienza generando una soluci√≥n inicial aleatoria. Para evitar configuraciones inv√°lidas se garantiza que todos los clusters contengan al menos una instancia.
+
+El procedimiento consiste en barajar el conjunto de instancias, asignar inicialmente una instancia distinta a cada cluster y posteriormente asignar el resto de instancias a clusters aleatorios, evitando la aparici√≥n de clusters vac√≠os.
 
 \begin{verbatim}
-	generarSolucionInicial()
+	solucion <- vector tama√±o n inicializado a -1
+	cluster_counts <- vector tama√±o k inicializado a 0
 	
-	barajar lista de instancias
+	instancias <- [0,...,n-1]
+	barajar(instancias)
 	
-	asignar una instancia distinta a cada cluster
+	// asegurar un elemento por cluster
+	para c desde 0 hasta k-1 hacer
+			i <- instancias[c]
+			solucion[i] <- c
+			cluster_counts[c]++
 	
-	para el resto de instancias
-	asignar cluster aleatorio
+	// asignar el resto aleatoriamente
+	para i desde k hasta n-1 hacer
+			inst <- instancias[i]
+			c <- valor aleatorio en [0,k-1]
+			solucion[inst] <- c
+			cluster_counts[c]++
+\end{verbatim}
+
+
+\subsubsection{Algoritmo de B√∫squeda Local}
+
+El algoritmo comienza evaluando la soluci√≥n inicial. Posteriormente explora el entorno buscando un vecino que mejore el valor de fitness. En cuanto se encuentra una mejora, se acepta el movimiento y se vuelve a generar el entorno desde la nueva soluci√≥n.
+
+
+\begin{verbatim}
+LocalSearch(problem, maxevals)
+	
+	solucion <- generarSolucionInicial()
+	fitness_actual <- fitness(solucion)
+	evaluations <- 1
+	improvement <- true
+	
+	mientras improvement y evaluations < maxevals hacer
+	
+			improvement <- false
+			entorno <- generarEntorno(solucion)
+	
+			para cada movimiento (i,l) en entorno hacer
+	
+					si evaluations ‚â• maxevals
+							salir
+	
+					old_cluster <- solucion[i]
+	
+					si cluster_counts[old_cluster] ‚â§ 1
+							continuar
+	
+					vecino <- copia(solucion)
+					vecino[i] <- l
+	
+					fitness_vecino <- fitness(vecino)
+					evaluations++
+	
+					si fitness_vecino < fitness_actual entonces
+					
+						solucion <- vecino
+						fitness_actual <- fitness_vecino
+					
+						actualizar cluster_counts
+	
+						improvement <- true
+						romper
 	
 	devolver solucion
 \end{verbatim}
 
-Este procedimiento evita la apariciÛn de clusters vacÌos desde el inicio de la b˙squeda, lo que facilita la exploraciÛn del espacio de soluciones.
-
+El algoritmo finaliza cuando se alcanza el n√∫mero m√°ximo de evaluaciones de la funci√≥n objetivo o cuando se explora completamente el entorno de una soluci√≥n sin encontrar ninguna mejora.
 
 
 
