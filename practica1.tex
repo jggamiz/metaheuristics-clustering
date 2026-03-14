@@ -35,7 +35,6 @@
 
 \usepackage[spanish]{babel} %%Para notas a pie de página
 
-
 \usepackage{amsthm}
 
 \def\proof{\paragraph{}}
@@ -545,6 +544,96 @@ LocalSearch(problem, maxevals)
 \end{verbatim}
 
 El algoritmo finaliza cuando se alcanza el número máximo de evaluaciones de la función objetivo o cuando se explora completamente el entorno de una solución sin encontrar ninguna mejora.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Estructura del código}
+
+\noindent El proyecto sigue una arquitectura basada en la plantilla proporcionada en PRADO, con adaptaciones y extensiones específicas para el problema PAR y el análisis de resultados. El directorio principal \texttt{software/} se organiza de la siguiente manera:
+
+\begin{itemize}
+	\item \texttt{common/}: Contiene las clases base y utilidades generales (\texttt{mh.h}, \texttt{problem.h}, \texttt{solution.h}, etc.). Estos archivos proporcionan la interfaz fundamental de la que heredan nuestros algoritmos y representaciones.
+	\item \texttt{inc/} y \texttt{src/}: Directorios que separan, respectivamente, las cabeceras (\texttt{.h}) y las implementaciones (\texttt{.cpp}) de las clases desarrolladas para esta práctica. Incluyen la definición del problema (\texttt{problemPAR}) y la lógica de los tres algoritmos (\texttt{greedy}, \texttt{localsearch}, \texttt{randomsearch}) implementando el método \texttt{optimize} para cada uno.
+	\item \texttt{bin/}: Carpeta destino donde el compilador genera los archivos objeto (\texttt{.o}) y el ejecutable final (\texttt{par\_solver}).
+	\item \texttt{data/}: Directorio que almacena los conjuntos de datos y los archivos de restricciones a evaluar.
+	\item \textbf{Archivos en la raíz}: 
+	\begin{itemize}
+		\item \texttt{main.cpp}: Punto de entrada del programa que gestiona los parámetros por consola y lanza la optimización.
+		\item \texttt{Makefile}: Archivo de configuración para automatizar la compilación.
+		\item \texttt{run\_all\_tests.sh}: Script en Bash para la ejecución en lote de toda la batería de pruebas.
+		\item \texttt{graf.py}: Script en Python para la generación automática de \textit{boxplots} a partir de los resultados. Está basado en el facilitado en PRADO pero tuve que hacer algunas modificaciones.
+		\item Archivos \texttt{.csv} y directorio \texttt{graficas/}: Salidas generadas tras la ejecución de los experimentos.
+	\end{itemize}
+\end{itemize}
+
+\subsection{Manual de compilación}
+
+Para compilar el proyecto se ha incluido un \texttt{Makefile} configurado para el compilador \texttt{g++}. Se utiliza el estándar C++17 y el flag de máxima optimización \texttt{-O3} para acelerar las ejecuciones.
+
+Para generar el ejecutable, basta con abrir un terminal en el directorio raíz del proyecto y ejecutar el comando:
+\begin{verbatim}
+	$ make
+\end{verbatim}
+
+Esto compilará los archivos fuente y generará el ejecutable \texttt{par\_solver} dentro de la carpeta \texttt{bin/}. Si se desea limpiar el entorno eliminando los archivos compilados, se puede ejecutar:
+\begin{verbatim}
+	$ make clean
+\end{verbatim}
+
+\subsection{Manual de ejecución}
+
+El software ofrece flexibilidad para ejecutarse de forma individual (para pruebas concretas) o de forma automatizada (para extraer todos los resultados de la memoria).
+
+\vspace{0.3cm}
+\noindent\textbf{1. Ejecución individual}
+
+El ejecutable principal admite hasta 4 parámetros por línea de comandos, siguiendo la sintaxis:
+\begin{small}
+\begin{verbatim}
+$ ./bin/par_solver <dataset_base_path> <k_clusters> <algorithm> [seed]
+\end{verbatim}
+\end{small}
+
+
+\begin{itemize}
+	\item \texttt{<dataset\_base\_path>}: Ruta base del archivo de datos (ej. \texttt{data/glass\_set}). El programa buscará automáticamente su archivo de restricciones asociado.
+	\item \texttt{<k\_clusters>}: Número de clusters a formar (típicamente 15 o 30).
+	\item \texttt{<algorithm>}: Algoritmo a ejecutar (\texttt{random}, \texttt{greedy}, \texttt{local}, o \texttt{all} para ejecutarlos todos secuencialmente).
+	\item \texttt{[seed]} \textit{(Opcional)}: Semilla para el generador de números aleatorios. Si no se especifica, el programa realiza 5 ejecuciones independientes usando un conjunto de semillas por defecto.
+\end{itemize}
+
+\noindent \textit{Ejemplo de ejecución:} Ejecutar todos los algoritmos sobre el dataset \textit{zoo} con $k=15$ y semilla 42:
+\begin{verbatim}
+	$ ./bin/par_solver data/zoo_set 15 all 42
+\end{verbatim}
+
+\vspace{0.3cm}
+\noindent\textbf{2. Ejecución automatizada (Batería de pruebas)}
+
+Para replicar los resultados mostrados en esta memoria, se ha desarrollado el script de bash  \texttt{run\_all\_tests.sh}. Este script lanza internamente el programa para los datasets Bupa, Glass y Zoo (con $k=15$ y $k=30$) empleando las 5 semillas.
+\begin{verbatim}
+	$ ./run_all_tests.sh
+\end{verbatim}
+Al finalizar, el programa genera automáticamente los archivos \texttt{det\_results.csv} (resultados detallados) y \texttt{avg\_results.csv} (medias de tiempo, fitness y evaluaciones).
+
+\vspace{0.3cm}
+\noindent\textbf{3. Generación de Gráficas}
+
+Una vez generados los archivos CSV, se pueden obtener los \textit{boxplots} que comparan la estabilidad de los algoritmos ejecutando el script de Python:
+\begin{verbatim}
+	$ python3 graf.py
+\end{verbatim}
+Este comando leerá el archivo de resultados detallados y exportará las imágenes PNG dentro de la carpeta \texttt{graficas/}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Experimentos y análisis de resultados}
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 
