@@ -1,0 +1,1077 @@
+% !TeX spellcheck = <none>
+\documentclass[a4paper,12pt]{article}%book}
+
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{fancyhdr}
+%\usepackage{mathptmx}
+\usepackage{helvet}
+\usepackage{courier}
+\usepackage{epsfig}
+\usepackage{type1cm}
+\usepackage{makeidx}        
+\usepackage[bottom]{footmisc}
+\usepackage[all]{xy}
+\usepackage{fancybox}
+\usepackage[latin1]{inputenc}	%acentos
+\usepackage[spanish]{babel}		%ordenes en español
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{wasysym}
+\usepackage{enumerate}
+\usepackage{multicol}
+\usepackage{epstopdf}
+\usepackage{wrapfig}
+\usepackage{pgf,tikz}
+\usepackage{subfigure}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{yhmath}
+\usepackage{float}
+\usepackage[mathscr]{euscript}
+\usetikzlibrary{shapes.gates.logic.US,trees,positioning,arrows}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true}
+
+\usepackage[spanish]{babel} %%Para notas a pie de página
+
+\usepackage{amsthm}
+
+\def\proof{\paragraph{}}
+\def\endproof{\hfill$\blacksquare$}
+
+\usepackage{mathtools}
+
+%\markright{Jorge García Gámiz}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Márgenes
+\usepackage{geometry}
+\geometry{
+top=3cm,
+bottom=3cm,
+left=3cm,
+right=3cm
+}
+
+%% Encabezados y pie de página
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+
+\lhead{}
+\rhead{Metaheurísticas - Práctica 1}
+\renewcommand{\headrulewidth}{0.08pt}
+
+\lfoot{}
+\rfoot{Jorge García Gámiz - DGIIM}
+\cfoot{\thepage}
+\renewcommand{\footrulewidth}{0.08pt}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+\begin{document}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% Portada:	
+\pagestyle{empty}
+
+\begin{center}
+	\hspace{-1cm}
+	\centering
+	
+	\vfill
+	
+	{\textsc{\Huge Práctica 1}}\\[0.4cm]
+	{\textsc{\large Práctica 1: Técnicas de Búsqueda de Poblaciones para el Problema de Asignación con Restricciones (PAR)}}
+	
+	\vfill
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.88\textwidth]{ugr.png}
+		%\label{fig:familia1}
+	\end{figure}
+	
+	\vfill
+	{\huge{Metaheurísticas}}\\
+	{Grupo A2: Viernes 15:30 - Curso 2025-2026}
+	
+	\vfill
+	{\huge{Jorge García Gámiz}} \\
+	{DNI: 77449859G} \\
+	{e-mail: jorgegarciag@correo.ugr.es}
+	
+	\vfill
+	{\small }
+\end{center} 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% ---------------- Índice ----------------
+\newpage
+\pagestyle{fancy}
+\setcounter{page}{1}
+
+\makeatletter
+\let\ps@plain\ps@fancy
+\makeatother
+
+\tableofcontents
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ----------- Inicio del documento --------
+\newpage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Descripción del Problema}
+
+\noindent El Problema de Asignación con Restricciones (PAR) es una generalización del problema de agrupamiento clásico que busca particionar un conjunto de $n$ instancias en $k$ clusters disjuntos, donde cada instancia $\vec{x}_i \in \mathbb{R}^d$ tiene $d$ características numéricas. 
+
+Además, se dispone de una matriz de restricciones $R\in M_{n \times n}$, donde:
+\begin{itemize}
+	\item $R_{ij}=1$ es Must-Link (ML): $i$ y $j$ deben pertenecer al mismo cluster
+	\item $R_{ij}=-1$ es Cannot-Link (CL): $i$ y $j$ deben estar en distintos clusters
+	\item $R_{ij}=0$ indica ausencia de restricción.
+\end{itemize}
+
+Una solución se representa como un vector de asignación $s = (s_1, ..., s_n)$ con $s_i \in \{0, ..., k-1\}$ asigna cada instancia a un cluster.
+
+
+\vspace{0.3cm}
+\noindent\textbf{Función Objetivo}
+
+El objetivo es obtener una partición solución que permita minimizar la función fitness definida como:
+
+\begin{equation}\label{fitness_eq}
+	fitness(s) = desviacion(s) + \lambda \cdot infeasibility(s),
+\end{equation}
+donde el parámetro $\lambda= \frac{\max_{i,j} \|\vec{x}_i - \vec{x}_j\|}{R} \in[0,1[$ equilibra ambos términos ($R$ es el número de restricciones).
+
+
+\vspace{0.3cm}
+\noindent\textbf{Desviación}
+
+La calidad del clustering se mide mediante la desviación general. Primero se calculan los centroides. Para cada cluster $C_i$, con $i\in\{0,\dotsc, k-1\}$, su centroide es:
+\begin{equation*}
+	\vec{\mu}_i = \frac{1}{|C_i|} \sum_{\vec{x}_j \in C_i} \vec{x}_j
+\end{equation*}
+
+Luego la distancia media intra--cluster, que es la media de las distancias de las instancias que lo conforman a su centroide:
+\begin{equation*}
+	dist_{intra-cluster}(C_i) = \frac{1}{|C_i|} \sum_{\vec{x}_j \in C_i} \|\vec{x}_j - \vec{\mu}_i\|
+\end{equation*}
+
+Definimos la desviación general de la partición en clusters $C = \{C_1,\dotsc, C_k\}$ como la media de las desviaciones intra--cluster de cada cluster:
+\begin{equation*}
+	desviacion(C) = \frac{1}{k} \sum_{i=1}^{k} dist_{intra-cluster}(C_i)
+\end{equation*}
+
+\vspace{0.1cm}
+\noindent\textbf{Infeasability}
+
+La ``infeasability'' cuenta el número de restricciones violadas:
+\begin{equation*}
+	infeasibility = \sum_{(i,j) \in ML} [s_i \neq s_j] + \sum_{(i,j) \in CL} [s_i = s_j]
+\end{equation*}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Aplicación de los algoritmos al problema}
+
+\noindent Para la resolución del problema de Asignación con Restricciones (PAR), hemos implementado tres algoritmos distintos: Búsqueda Aleatoria (Random Search), Búsqueda Greedy y Búsqueda Local. Todos ellos comparten una estructura común, heredada de la clase \texttt{MH}, que únicamente incluye un constructor y un destructor por defecto y el método \texttt{optimize}, el cual recibe como parámetros el problema que van a estudiar y el número máximo de evaluaciones antes de parar la ejecución del algoritmo. Este es el método que se llamará desde el main para estudiar cómo se comporta cada algoritmo a la hora de resolver el problema.
+
+Los tres algoritmos implementados comparten una misma estructura básica de representación de soluciones y evaluación de la función objetivo. En esta sección se describen los elementos comunes a todos los métodos: la representación de soluciones, la generación de soluciones iniciales y el cálculo del fitness.
+
+\subsubsection*{Representación del problema}
+
+\noindent El problema se encapsula en la clase \texttt{ProblemPAR}, encargada de almacenar los datos de la instancia y proporcionar los métodos necesarios para evaluar soluciones. Esta clase mantiene como atributos principales:
+
+\begin{itemize}
+	\item \texttt{features}: matriz que contiene las características de cada instancia del conjunto de datos.
+	\item \texttt{constraints}: matriz de restricciones que indica las relaciones Must-Link y Cannot-Link entre pares de instancias.
+	\item \texttt{num\_clusters}: número de clusters en los que se debe dividir el conjunto de instancias.
+	\item \texttt{lambda}: parámetro de penalización utilizado en la función objetivo.
+\end{itemize}
+
+Durante la construcción del problema se leen los datos desde fichero y se calcula automáticamente el valor de $\lambda$ según la expresión definida en la sección anterior.
+
+\subsubsection*{Representación de las soluciones}
+
+\noindent Una solución candidata se representa mediante una estructura \texttt{tSolution<int>}, que, como ya describimos en la sección anterior, en nuestra implementación corresponde a un vector de enteros donde cada posición $i$ indica el identificador del cluster al que pertenece la instancia $i$. Por tanto:
+
+\[
+s = (s_1, s_2, ..., s_n), \quad s_i \in \{0,\dots,k-1\}
+\]
+donde $k$ es el número total de clusters.
+
+Esta representación permite modificar fácilmente la asignación de cualquier instancia a otro cluster, lo cual es fundamental para los algoritmos de búsqueda utilizados.
+
+\subsubsection*{Generación de soluciones iniciales}
+
+\noindent Los algoritmos que requieren una solución inicial utilizan el método \texttt{createSolution}, que genera una asignación aleatoria de instancias a clusters. El procedimiento consiste simplemente en asignar a cada instancia un cluster elegido de forma uniforme dentro del dominio permitido.
+
+El pseudocódigo del procedimiento es el siguiente:
+
+\small{
+\begin{verbatim}
+createSolution()
+			n <- número de instancias
+			solucion <- vector de tamaño n
+		
+			para i desde 0 hasta n-1 hacer
+					solucion[i] <- valor aleatorio en [0, k-1]
+				
+			devolver solucion
+\end{verbatim}
+}
+
+Este método permite generar rápidamente soluciones iniciales diversas que pueden ser utilizadas por los distintos algoritmos de búsqueda.
+
+\subsubsection*{Cálculo de centroides}
+
+\noindent Para evaluar la calidad de una solución es necesario calcular los centroides de los clusters definidos por dicha solución. El procedimiento utilizado es el siguiente:
+
+\small{
+\begin{verbatim}
+calculateCentroids(solution)
+
+			inicializar centroides[k][d] a 0
+			inicializar contador_elementos[k] a 0
+
+			para cada instancia i hacer
+					c <- solution[i]
+
+					si c >= 0 y c < k entonces
+							para cada característica f hacer
+									centroides[c][f] <- centroides[c][f] + features[i][f]
+
+					contador_elementos[c]++
+
+			para cada cluster c hacer
+					si contador_elementos[c] > 0 entonces
+							para cada característica f hacer
+									centroides[c][f] <- centroides[c][f] / contador_elementos[c]
+
+			devolver centroides
+\end{verbatim}
+}
+donde $d$ representa el número de características de cada instancia.
+
+\subsubsection*{Cálculo de la desviación}
+
+\noindent Una vez obtenidos los centroides, se calcula la desviación media intra--cluster de cada cluster y posteriormente la desviación global de la partición.
+
+\small{
+\begin{verbatim}
+calculateDeviation(solution)
+
+			centroides <- calculateCentroids(solution)
+			
+			inicializar suma_distancias[k] a 0
+			inicializar contador[k] a 0
+			
+			// Acumular distancias a centroides
+			para cada instancia i hacer
+					c <- solution[i]
+			
+					si c == -1 entonces
+							continuar
+				
+					suma_distancias[c] <- suma_distancias[c]
+																								+ distancia(features[i], centroides[c])
+					contador[c]++
+			
+			total_dev <- 0
+				
+			// Calcular desviación por cluster
+			para cada cluster c hacer
+					si contador[c] > 0 entonces
+							desviacion_cluster <- suma_distancias[c] / contador[c]
+					sino
+							desviacion_cluster <- PENALTY   // e.g., 999999
+				
+					total_dev <- total_dev + desviacion_cluster
+				
+			devolver total_dev / k
+\end{verbatim}
+}
+
+Donde en \texttt{distancia} estamos usanco la distancia euclídea implementada en una función \texttt{calculateEuclideanDistance(instancia i1, instancia i2)}.
+
+Si algún cluster queda vacío, se aplica una penalización elevada (999999.0) para evitar que este tipo de soluciones sea favorecido por los algoritmos de búsqueda.
+
+\subsubsection*{Cálculo de infeasibility}
+
+\noindent El término de infeasibility mide el número de restricciones violadas por una solución. Para ello se recorren todos los pares de instancias y se comprueba si la asignación de clusters respeta las restricciones Must-Link y Cannot-Link.
+
+\small{
+\begin{verbatim}
+calculateInfeasibility(solution)
+
+			infeasibility <- 0
+			
+			para cada par (i, j) con i < j hacer
+			
+					si solution[i] == -1 o solution[j] == -1 entonces
+							continuar
+			
+					si constraints[i][j] != 0 entonces
+			
+							mismo_cluster <- (solution[i] == solution[j])
+			
+							si constraints[i][j] == 1 y no mismo_cluster entonces
+									infeasibility++
+			
+							si constraints[i][j] == -1 y mismo_cluster entonces
+									infeasibility++
+			
+			devolver infeasibility
+\end{verbatim}
+}
+
+\subsubsection*{Función objetivo}
+
+\noindent Finalmente, el valor de fitness de una solución se calcula (véase Ecuación \eqref{fitness_eq}) combinando la desviación intra--cluster y el número de restricciones violadas mediante el parámetro $\lambda$ descrito anteriormente. Así se refleja en el código:
+
+\small{
+\begin{verbatim}
+fitness(solution)
+	
+			desviacion <- calculateDeviation(solution)
+			infeas <- calculateInfeasibility(solution)
+	
+			devolver desviacion + lambda * infeas
+\end{verbatim}
+}
+
+Esta función permite equilibrar la calidad del agrupamiento con el grado de cumplimiento de las restricciones, penalizando aquellas soluciones que violan un mayor número de ellas.
+
+Los tres algoritmos implementados utilizan esta misma función de evaluación para comparar soluciones y guiar el proceso de búsqueda.
+
+Por su parte, para calcular $\lambda$ (\texttt{lambda}) en \eqref{fitness_eq}, usamos la función siguiente:
+
+\small{
+\begin{verbatim}
+calculateLambda()
+
+			max_dist <- 0
+			
+			// Máxima distancia entre pares
+			para cada par (i, j) con i < j hacer
+					dist <- distancia(features[i], features[j])
+			
+					si dist > max_dist entonces
+							max_dist <- dist
+			
+			// Contar restricciones
+			R <- 0
+			
+			para cada par (i, j) con i < j hacer
+					si constraints[i][j] != 0 entonces
+							R++
+			
+			si R == 0 entonces
+					devolver 0
+			
+			devolver max_dist / R
+\end{verbatim}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+\section{Estructura de los algoritmos}
+
+\noindent En esta sección se describen los algoritmos utilizados para resolver el problema. En todos los casos los métodos devuelven una estructura \texttt{ResultMH}, que contiene la mejor solución encontrada, su valor de fitness y el número de evaluaciones realizadas.
+
+\subsection{Búsqueda Aleatoria}
+
+\noindent El algoritmo Random Search constituye un método de referencia muy sencillo que consiste en generar soluciones completamente aleatorias y conservar la mejor encontrada.
+
+En cada iteración se genera una solución mediante el método \texttt{createSolution} definido en el problema y se evalúa mediante la función \texttt{fitness}. Si la nueva solución mejora a la mejor encontrada hasta el momento, se actualiza.
+
+El proceso continúa hasta alcanzar el número máximo de evaluaciones permitido.
+
+{\small
+\begin{verbatim}
+RandomSearch(problem, maxevals)
+	
+	best_solution <- null
+	best_fitness <- infinito
+	evaluations <- 0
+	
+	para i desde 1 hasta maxevals hacer
+			solution <- createSolution(problem)
+			fitness <- fitness(solution)
+	
+			evaluations++
+	
+			si fitness < best_fitness entonces
+					best_solution <- solution
+					best_fitness <- fitness
+	
+	devolver (best_solution, best_fitness, evaluations)
+\end{verbatim}
+}
+
+Este algoritmo no realiza ninguna explotación del espacio de búsqueda, pero sirve como referencia para comparar el rendimiento de los métodos más sofisticados.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Algoritmo Greedy}
+
+\noindent Los algoritmos greedy se caracterizan por tomar decisiones basadas únicamente en la información disponible en el estado actual, seleccionando en cada paso la alternativa que parece más prometedora según un criterio heurístico.
+
+En nuestro caso, el algoritmo greedy implementado sigue una estrategia similar al algoritmo \textit{k-means}, adaptada para tener en cuenta las restricciones del problema. En lugar de optimizar directamente la función fitness global, el algoritmo construye iterativamente una partición de las instancias asignando cada una al cluster que minimiza una heurística local basada en dos criterios: el número de restricciones violadas al realizar la asignación y la distancia euclídea al centroide del cluster.
+
+El algoritmo comienza generando $k$ centroides iniciales aleatorios dentro del dominio de cada característica del conjunto de datos. A partir de estos centroides iniciales, las instancias se asignan iterativamente a los clusters utilizando la función heurística descrita más adelante. Tras cada iteración se recalculan los centroides como la media de las instancias asignadas a cada cluster.
+
+El proceso se repite recalculando los centroides hasta que ninguna instancia cambia de cluster.
+
+\subsubsection{Esquema general del algoritmo}
+
+{\small
+\begin{verbatim}
+Greedy(problem, maxevals)
+		obtener datos y parámetros (n, d, k)
+
+		// Calcular dominio de cada característica
+		calcular min_f y max_f para cada dimensión
+
+		// Inicializar centroides aleatorios
+		generar k centroides dentro del dominio
+
+		// Inicializar solución
+		sol[i] <- -1 para todo i
+		changed <- true
+
+		mientras changed hacer
+				changed <- false
+				barajar instancias
+				
+				para cada instancia i hacer
+
+						mejor_cluster <- -1
+						mejor_valor <- (infinito, infinito)
+
+						para cada cluster c hacer
+
+								valor <- Heuristica(i, c, sol, centroides, restricciones)
+
+								si valor < mejor_valor entonces
+										mejor_valor <- valor
+										mejor_cluster <- c
+
+						si sol[i] != mejor_cluster entonces
+								sol[i] <- mejor_cluster
+								changed <- true
+
+				// Recalcular centroides
+				para cada cluster c hacer
+						centroides[c] <- media de sus instancias (si no está vacío)
+
+		devolver sol
+\end{verbatim}
+}
+
+\subsubsection{Función heurística}
+
+\noindent Para decidir a qué cluster asignar cada instancia se utiliza una función heurística que considera dos factores:
+
+\begin{itemize}
+	\item Número de restricciones violadas al asignar la instancia al cluster.
+	\item Distancia euclídea al centroide del cluster.
+\end{itemize}
+
+El criterio principal es minimizar el número de violaciones de restricciones, utilizando la distancia únicamente como criterio de desempate.
+
+{\small
+\begin{verbatim}
+Heuristica(instancia i, cluster c, sol, centroides, restricciones)
+
+		// Distancia euclídea al centroide
+		distancia <- dist(i, centroides[c])
+
+		// Cálculo de violaciones
+		violaciones <- 0
+
+		para cada instancia j hacer
+				si j != i y sol[j] != -1 entonces
+						si restricción(i,j) = must-link y c != sol[j]
+								violaciones++
+						si restricción(i,j) = cannot-link y c == sol[j]
+								violaciones++
+
+		devolver (violaciones, distancia)
+\end{verbatim}
+}
+
+\noindent\textbf{Nota:} la heurística no se implementa como función explícita, sino que se calcula directamente dentro del bucle de asignación.
+
+Finalmente, cuando el algoritmo converge, la solución obtenida se evalúa mediante la función fitness definida anteriormente para obtener su valor final.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Búsqueda Local}
+
+\noindent La Búsqueda Local es un algoritmo de mejora iterativa que parte de una solución inicial y explora su entorno\footnote{formado por todas aquellas soluciones que se obtienen moviendo una instancia de su cluster actual a otro distinto} en busca de soluciones con mejor valor de la función objetivo. El proceso continúa mientras se encuentren mejoras y no se supere el número máximo de evaluaciones permitido.
+
+En nuestro caso el algoritmo utiliza una estrategia de exploración \textit{primer mejor}. Esto significa que el entorno de la solución actual se recorre hasta encontrar el primer vecino que mejora el valor de la función objetivo, aceptándose inmediatamente como nueva solución. A partir de esa nueva solución se vuelve a generar y explorar su entorno.
+
+
+\subsubsection{Operador de generación de vecino}
+
+\noindent El operador de generación de vecinos consiste en seleccionar una instancia y moverla a un cluster distinto. Formalmente, dado un vector solución $ s = (s_1, \dots, s_n)$, se selecciona una instancia $i$ y se modifica su asignación a un cluster distinto $l$, quedando $s' = (s_1, \dots, l, \dots, s_n)$
+
+Para evitar generar soluciones inválidas, se impone la restricción adicional de no permitir movimientos que dejen un cluster vacío.
+
+\subsubsection{Exploración del entorno}
+
+\noindent El entorno de una solución $s$ está formado por todas las soluciones que pueden generarse aplicando el operador anterior a cada una de las instancias y a todos los clusters distintos del actual. Por tanto, si el problema tiene $n$ instancias y $k$ clusters, el tamaño máximo del entorno es $n(k-1)$.
+
+La exploración del entorno no se realiza en un orden determinista, sino en un orden aleatorio. Esto introduce diversidad en la búsqueda y evita sesgos sistemáticos en la exploración del espacio de soluciones.
+
+En la implementación se genera explícitamente el conjunto de movimientos posibles $(i,l)$ y posteriormente se barajan aleatoriamente antes de comenzar la exploración.
+
+{\small
+\begin{verbatim}
+		generarEntorno(solucion)
+			
+					entorno <- lista vacía
+			
+					para i desde 1 hasta n hacer
+							para l desde 0 hasta k-1 hacer
+									si l != solucion[i]
+											añadir (i,l) a entorno
+			
+					barajar(entorno)
+				
+					devolver entorno
+\end{verbatim}
+}
+
+La estrategia utilizada es \textit{primer mejor}: en cuanto se encuentra un vecino con mejor fitness que la solución actual, se acepta inmediatamente y se vuelve a generar el entorno desde la nueva solución.
+
+\subsubsection{Generación de solución inicial}
+
+\noindent La búsqueda comienza generando una solución inicial aleatoria. Para evitar configuraciones inválidas se garantiza que todos los clusters contengan al menos una instancia.
+
+El procedimiento consiste en barajar el conjunto de instancias, asignar inicialmente una instancia distinta a cada cluster y posteriormente asignar el resto de instancias a clusters aleatorios, evitando la aparición de clusters vacíos.
+
+{\small
+\begin{verbatim}
+				generarSolucionInicial()
+				
+						solucion <- vector tamaño n inicializado a -1
+						cluster_counts <- vector tamaño k inicializado a 0
+				
+						instancias <- [0,...,n-1]
+						barajar(instancias)
+				
+						// Asegurar que ningún cluster esté vacío
+						para c desde 0 hasta k-1 hacer
+								i <- instancias[c]
+								solucion[i] <- c
+								cluster_counts[c]++
+				
+						// Asignar el resto aleatoriamente
+						para i desde k hasta n-1 hacer
+								inst <- instancias[i]
+								c <- valor aleatorio en [0, k-1]
+								solucion[inst] <- c
+								cluster_counts[c]++
+				
+						devolver (solucion, cluster_counts)
+\end{verbatim}
+}
+
+
+\subsubsection{Algoritmo de Búsqueda Local}
+
+\noindent El algoritmo comienza evaluando la solución inicial. Posteriormente explora el entorno buscando un vecino que mejore el valor de fitness. En cuanto se encuentra una mejora, se acepta el movimiento y se vuelve a generar el entorno desde la nueva solución.
+
+{\small
+\begin{verbatim}
+LocalSearch(problem, maxevals)
+
+		(solucion, cluster_counts) <- generarSolucionInicial()
+
+		fitness_actual <- fitness(solucion)
+		evaluations <- 1
+		improvement <- true
+
+		mientras improvement y evaluations < maxevals hacer
+
+				improvement <- false
+				entorno <- generarEntorno(solucion)
+
+				// Exploración del vecindario (Primer Mejor)
+				para cada movimiento (i, new_cluster) en entorno hacer
+
+						si evaluations >= maxevals entonces
+								salir
+
+						old_cluster <- solucion[i]
+
+						// No permitir clusters vacíos
+						si cluster_counts[old_cluster] <= 1 entonces
+								continuar
+
+						// Generar vecino
+						vecino <- copia(solucion)
+						vecino[i] <- new_cluster
+
+						fitness_vecino <- fitness(vecino)
+						evaluations++
+
+						// Criterio de aceptación: mejora estricta
+						si fitness_vecino < fitness_actual entonces
+
+								solucion <- vecino
+								fitness_actual <- fitness_vecino
+
+								// Actualizar contadores
+								cluster_counts[old_cluster]--
+								cluster_counts[new_cluster]++
+
+								improvement <- true
+								romper   // estrategia First Improvement
+
+
+		devolver solucion
+\end{verbatim}
+}
+
+El algoritmo finaliza cuando se alcanza el número máximo de evaluaciones de la función objetivo o cuando se explora completamente el entorno de una solución sin encontrar ninguna mejora.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Estructura del código}
+
+\noindent El proyecto sigue una arquitectura basada en la plantilla proporcionada en PRADO, con adaptaciones y extensiones específicas para el problema PAR y el análisis de resultados. El directorio principal \texttt{software/} se organiza de la siguiente manera:
+
+\begin{itemize}
+	\item \texttt{common/}: Contiene las clases base y utilidades generales (\texttt{mh.h}, \texttt{problem.h}, \texttt{solution.h}, etc.). Estos archivos proporcionan la interfaz fundamental de la que heredan nuestros algoritmos y representaciones.
+	\item \texttt{inc/} y \texttt{src/}: Directorios que separan, respectivamente, las cabeceras (\texttt{.h}) y las implementaciones (\texttt{.cpp}) de las clases desarrolladas para esta práctica. Incluyen la definición del problema (\texttt{problemPAR}) y la lógica de los tres algoritmos (\texttt{greedy}, \texttt{localsearch}, \texttt{randomsearch}) implementando el método \texttt{optimize} para cada uno.
+	\item \texttt{bin/}: Carpeta destino donde el compilador genera los archivos objeto (\texttt{.o}) y el ejecutable final (\texttt{par\_solver}).
+	\item \texttt{data/}: Directorio que almacena los conjuntos de datos y los archivos de restricciones a evaluar.
+	\item \textbf{Archivos en la raíz}: 
+	\begin{itemize}
+		\item \texttt{main.cpp}: Punto de entrada del programa que gestiona los parámetros por consola y lanza la optimización.
+		\item \texttt{Makefile}: Archivo de configuración para automatizar la compilación.
+		\item \texttt{run\_all\_tests.sh}: Script en Bash para la ejecución en lote de toda la batería de pruebas.
+		\item \texttt{graf.py}: Script en Python para la generación automática de \textit{boxplots} a partir de los resultados.
+		\item \texttt{wilcoxon.py}: Script en Python que realiza el test de Wilcoxon.
+		\item Archivos \texttt{.csv} y directorio \texttt{graficas/}: Salidas generadas tras la ejecución de los experimentos.
+	\end{itemize}
+\end{itemize}
+
+\subsection{Manual de compilación}
+
+\noindent Para compilar el proyecto se ha incluido un \texttt{Makefile} configurado para el compilador \texttt{g++}. Se utiliza el estándar C++17 y el flag de máxima optimización \texttt{-O3} para acelerar las ejecuciones.
+
+Para generar el ejecutable, basta con abrir un terminal en el directorio raíz del proyecto y ejecutar el comando:
+\begin{verbatim}
+	$ make
+\end{verbatim}
+
+Esto compilará los archivos fuente y generará el ejecutable \texttt{par\_solver} dentro de la carpeta \texttt{bin/}. Si se desea limpiar el entorno eliminando los archivos compilados, se puede ejecutar:
+\begin{verbatim}
+	$ make clean
+\end{verbatim}
+
+\subsection{Manual de ejecución}
+
+\noindent El software ofrece flexibilidad para ejecutarse de forma individual (para pruebas concretas) o de forma automatizada (para extraer todos los resultados de la memoria).
+
+\vspace{0.3cm}
+\noindent\textbf{1. Ejecución individual}
+
+El ejecutable principal admite hasta 4 parámetros por línea de comandos, siguiendo la sintaxis:
+\begin{small}
+\begin{verbatim}
+$ ./bin/par_solver <dataset_base_path> <k_clusters> <algorithm> [seed]
+\end{verbatim}
+\end{small}
+
+
+\begin{itemize}
+	\item \texttt{<dataset\_base\_path>}: Ruta base del archivo de datos (ej. \texttt{data/glass\_set}). El programa buscará automáticamente su archivo de restricciones asociado.
+	\item \texttt{<k\_clusters>}: Número de clusters a formar (típicamente 15 o 30).
+	\item \texttt{<algorithm>}: Algoritmo a ejecutar (\texttt{random}, \texttt{greedy}, \texttt{local}, o \texttt{all} para ejecutarlos todos secuencialmente).
+	\item \texttt{[seed]} \textit{(Opcional)}: Semilla para el generador de números aleatorios. Si no se especifica, el programa realiza 5 ejecuciones independientes usando un conjunto de semillas por defecto.
+\end{itemize}
+
+\noindent \textit{Ejemplo de ejecución:} Ejecutar todos los algoritmos sobre el dataset \textit{zoo} con $k=15$ y semilla 42:
+\begin{verbatim}
+	$ ./bin/par_solver data/zoo_set 15 all 42
+\end{verbatim}
+
+\vspace{0.3cm}
+\noindent\textbf{2. Ejecución automatizada (Batería de pruebas)}
+
+Para replicar los resultados mostrados en esta memoria, se ha desarrollado el script de bash  \texttt{run\_all\_tests.sh}. Este script lanza internamente el programa para los datasets Bupa, Glass y Zoo (con $k=15$ y $k=30$) empleando las 5 semillas.
+\begin{verbatim}
+	$ ./run_all_tests.sh
+\end{verbatim}
+Al finalizar, el programa genera automáticamente los archivos \texttt{det\_results.csv} (resultados detallados) y \texttt{avg\_results.csv} (medias de tiempo, fitness y evaluaciones).
+
+\vspace{0.3cm}
+\noindent\textbf{3. Generación de Gráficas}
+
+Una vez generados los archivos CSV, se pueden obtener los \textit{boxplots} que comparan la estabilidad de los algoritmos ejecutando el script de Python:
+\begin{verbatim}
+	$ python3 graf.py
+\end{verbatim}
+Este comando leerá el archivo de resultados detallados y exportará las imágenes PNG dentro de la carpeta \texttt{graficas/}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Experimentación y Análisis de Resultados}
+
+\subsection{Descripción de los casos de prueba}
+
+\noindent Para evaluar el rendimiento y la robustez de los algoritmos implementados, se ha seleccionado un banco de pruebas compuesto por tres conjuntos de datos (\textit{datasets}) de características variadas. Para cada uno de estos conjuntos, se ha abordado el problema de particionamiento considerando dos valores distintos para el número de clusters a formar: $k=15$ y $k=30$.
+
+Las características principales de los conjuntos de datos, incluyendo el número total de instancias ($n$) y el número de atributos numéricos continuos que definen cada instancia ($d$), se resumen en la siguiente tabla:
+
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{|l|c|c|}
+		\hline
+		\textbf{Dataset} (\texttt{.dat}) & \textbf{Instancias $(n)$} & \textbf{Atributos $(d)$} \\ \hline
+		\texttt{bupa\_set} & 345 & 5 \\ \hline
+		\texttt{glass\_set} & 214 & 9 \\ \hline
+		\texttt{zoo\_set} & 101 & 16 \\ \hline
+	\end{tabular}
+	\caption{Características de los datasets empleados.}
+	\label{tab:datasets}
+\end{table}
+
+Junto a cada conjunto de datos y para cada valor de $K$, se proporciona un archivo de restricciones asociado (\texttt{\_const\_15.dat} y \texttt{\_const\_30.dat}), que define las condiciones estructurales \textit{Must-Link} y \textit{Cannot-Link} que los algoritmos deben intentar satisfacer.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Parámetros de ejecución}
+
+\noindent Dado el carácter estocástico de la Búsqueda Aleatoria y la Búsqueda Local, es necesario definir un entorno de pruebas riguroso que permita extraer conclusiones con significancia estadística. La configuración del marco experimental es la siguiente:
+
+\begin{itemize}
+	\item \textbf{Criterio de parada:} Los algoritmos Búsqueda Aleatoria y Búsqueda Local se ejecutan utilizando como criterio de parada un límite máximo de 100\,000 evaluaciones de la función objetivo. 	Por su parte, el algoritmo Greedy es de naturaleza constructiva y finaliza cuando el procedimiento iterativo de asignación de instancias converge, por lo que no requiere un número máximo de evaluaciones como condición de parada.
+	
+	
+	\item \textbf{Inicialización del generador aleatorio:} Para mitigar el sesgo introducido por la aleatoriedad en las decisiones iniciales o en la exploración del vecindario, se han ejecutado 10 iteraciones independientes para cada combinación de algoritmo, dataset y valor de $k$. 
+	 
+	Para garantizar la validez del análisis experimental, cada algoritmo se ha ejecutado múltiples veces utilizando distintas semillas aleatorias. En concreto, las ejecuciones se controlan mediante un conjunto de semillas consecutivas inicializado en el valor 1000 (es decir, $\{1000, 1001, \dots, 1009\}$), utilizadas para inicializar el generador de números aleatorios mediante la función \texttt{Random::seed()}.
+	
+	De este modo, la ejecución $i$-ésima de cada algoritmo utiliza la misma semilla, lo que permite realizar comparaciones emparejadas entre algoritmos bajo idénticas condiciones iniciales. Esta estrategia asegura tanto la reproducibilidad de los experimentos como la validez de los contrastes estadísticos realizados posteriormente.	
+		
+	\item \textbf{Registro de resultados:} Durante cada ejecución, el sistema ha registrado de manera automatizada el \textit{fitness} alcanzado, la desviación, la \textit{infeasibility} final, el número real de evaluaciones consumidas y el tiempo de cómputo en segundos. 
+
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Resultados obtenidos}
+
+\noindent En esta sección se presentan los resultados obtenidos en los experimentos realizados. Las tablas siguientes muestran los valores medios obtenidos a partir de dichas 10 ejecuciones. En concreto, se reportan las medias del valor de la función objetivo \textit{fitness}, la desviación intra--cluster, la infeasibility (número de restricciones violadas), el número de evaluaciones de la función objetivo realizadas y el tiempo de ejecución en segundos.
+
+Además de la presentación de los valores medios, se incluirán más tarde\footnote{en la sección 5.4.5: Análisis de la variabilidad de los resultados} diagramas \textit{boxplots} que permiten visualizar la distribución de los resultados obtenidos en las 10 ejecuciones realizadas para cada algoritmo.
+
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|ccccc|}
+		\hline
+		Algoritmo & Fitness & Distancia & Incumplimiento & Evaluaciones & Tiempo (s) \\
+		\hline
+		Random & 0.34 & 0.25 & 490.7 & 100000 & 16.78 \\
+		Greedy & 0.24 & 0.24 & 17.2 & 1 & $2.56\times 10^{-2}$ \\
+		Local  & 0.18 & 0.15 & 168.2 & 85442.6 & 13.54 \\
+		\hline
+	\end{tabular}
+	\caption{Resultados medios para el dataset \textit{Bupa} con $k=15$.}
+	\label{tab_bupa15}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|ccccc|}
+		\hline
+		Algoritmo & Fitness & Distancia & Incumplimiento & Evaluaciones & Tiempo (s) \\
+		\hline
+		Random & 0.28 & 0.23 & 567.3 & 100000 & 29.83 \\
+		Greedy & 0.23 & 0.23 & 3.5 & 1 & $3.60\times 10^{-2}$ \\
+		Local  & 0.13 & 0.10 & 346.7 & 99781.7 & 29.25 \\
+		\hline
+	\end{tabular}
+	\caption{Resultados medios para el dataset \textit{Bupa} con $k=30$.}
+	\label{tab_bupa30}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|ccccc|}
+		\hline
+		Algoritmo & Fitness & Distancia & Incumplimiento & Evaluaciones & Tiempo (s) \\
+		\hline
+		Random & 0.52 & 0.40 & 173.5 & 100000 & 6.32 \\
+		Greedy & 0.34 & 0.34 & 0 & 1 & $1.01\times 10^{-2}$ \\
+		Local  & 0.22 & 0.19 & 47.2 & 36397 & 2.07 \\
+		\hline
+	\end{tabular}
+	\caption{Resultados medios para el dataset \textit{Glass} con $k=15$.}
+	\label{tab_glass15}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|ccccc|}
+		\hline
+		Algoritmo & Fitness & Distancia & Incumplimiento & Evaluaciones & Tiempo (s) \\
+		\hline
+		Random & 0.42 & 0.35 & 218.7 & 100000 & 11.20 \\
+		Greedy & 73333.5 & 73333.5 & 0 & 1 & $1.80\times 10^{-2}$ \\
+		Local  & 0.16 & 0.13 & 103.6 & 76518.1 & 8.15 \\
+		\hline
+	\end{tabular}
+	\caption{Resultados medios para el dataset \textit{Glass} con $k=30$.}
+	\label{tab_glass30}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|ccccc|}
+		\hline
+		Algoritmo & Fitness & Distancia & Incumplimiento & Evaluaciones & Tiempo (s) \\
+		\hline
+		Random & 1.47 & 1.27 & 37 & 100000 & 1.30 \\
+		Greedy & 13334.2 & 13334.2 & 0 & 1 & $1.64\times 10^{-3}$ \\
+		Local  & 0.53 & 0.50 & 6.3 & 13951.9 & 0.12 \\
+		\hline
+	\end{tabular}
+	\caption{Resultados medios para el dataset \textit{Zoo} con $k=15$.}
+	\label{tab_zoo15}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|ccccc|}
+		\hline
+		Algoritmo & Fitness & Distancia & Incumplimiento & Evaluaciones & Tiempo (s) \\
+		\hline
+		Random & 1.03 & 0.90 & 48.7 & 100000 & 1.99 \\
+		Greedy & 140000 & 140000 & 0 & 1 & $2.93\times 10^{-3}$ \\
+		Local  & 0.29 & 0.24 & 17.5 & 23325.4 & 0.24 \\
+		\hline
+	\end{tabular}
+	\caption{Resultados medios para el dataset \textit{Zoo} con $k=30$.}
+	\label{tab_zoo30}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Análisis de resultados}
+
+\noindent Una vez presentados los resultados promedios de las ejecuciones, procedemos a realizar un análisis exhaustivo del comportamiento de cada algoritmo. El objetivo es interpretar los resultados en función de las características de cada algoritmo y de la función objetivo empleada.
+
+\subsubsection{Comparación general entre algoritmos}
+
+\noindent De forma general, el algoritmo de \textit{Búsqueda Local} obtiene los mejores valores de \textit{fitness} en todos los conjuntos de datos y para ambos valores de $k$. Este comportamiento es esperable, ya que este método parte de una solución inicial aleatoria y explora iterativamente el vecindario aceptando mejoras, lo que le permite refinar progresivamente la calidad de la solución.
+
+Por el contrario, el algoritmo de \textit{Búsqueda Aleatoria} presenta los peores resultados en la mayoría de los casos. Este comportamiento también resulta coherente con su funcionamiento, ya que el algoritmo simplemente genera soluciones aleatorias dentro del espacio de búsqueda sin realizar ningún proceso de mejora posterior. Como consecuencia, aunque puede encontrar ocasionalmente soluciones aceptables, en promedio la calidad de las soluciones generadas es significativamente inferior.
+
+El algoritmo \textit{Greedy} muestra un comportamiento intermedio en algunos casos, aunque presenta resultados muy variables dependiendo del conjunto de datos. Al tratarse de un algoritmo constructivo que toma decisiones locales basadas en la información disponible en cada paso, puede generar soluciones razonables cuando la estructura del problema lo favorece, pero también puede quedar atrapado en configuraciones poco adecuadas.
+
+
+\subsubsection{Impacto de las restricciones en la función objetivo}
+
+\noindent La formulación de la función objetivo \eqref{fitness_eq} condiciona de forma directa el comportamiento de los algoritmos frente al cumplimiento de las restricciones. El equilibrio entre los términos de desviación intra--cluster e \textit{infeasibility} determina el tipo de soluciones que cada algoritmo tiende a generar.
+
+En este contexto, el algoritmo \textit{Greedy} muestra una clara tendencia a priorizar la satisfacción de las restricciones desde las primeras fases de construcción de la solución. Como resultado, en muchas ejecuciones se obtienen particiones con \textit{infeasibility} igual a cero. Sin embargo, esta estrategia puede deteriorar significativamente la calidad geométrica de los clusters, incrementando la desviación intra--cluster.
+
+Este comportamiento se hace especialmente evidente en algunos casos donde se observan valores extremadamente elevados del \textit{fitness} para el algoritmo \textit{Greedy}, particularmente en los datasets \textit{Glass} (superando los $73333$), como se muestra en el Cuadro \ref{tab_glass30}, y \textit{Zoo} (superando los $140000$), como puede observarse en el Cuadro \ref{tab_zoo30}.
+
+Estos valores resultan poco coherentes desde el punto de vista del clustering, ya que implican desviaciones intra--cluster extremadamente elevadas. Una posible explicación de este fenómeno está relacionada con la naturaleza constructiva del algoritmo. Al asignar instancias de forma secuencial sin mecanismos de retroceso (\textit{backtracking}), el método puede generar configuraciones problemáticas cuando el número de clusters es elevado en relación con el tamaño del dataset. En conjuntos de datos relativamente pequeños (como \textit{Zoo}, con $n=101$ instancias) la imposición de $k=30$ clusters puede conducir a situaciones en las que algunos clusters quedan vacíos. La función objetivo penaliza explícitamente estas configuraciones mediante una penalización muy elevada, lo que provoca que el valor final del \textit{fitness} se dispare.
+
+A pesar de este comportamiento en ciertos escenarios, el algoritmo \textit{Greedy} presenta la ventaja de generar desde el inicio soluciones completamente factibles en términos de restricciones. En contraste, la \textit{Búsqueda Local} tiende a priorizar la mejora de la estructura geométrica de los clusters, reduciendo la distancia de las instancias a sus centroides incluso cuando ello implica violar algunas restricciones. Esta diferencia de comportamiento refleja el compromiso inherente entre calidad geométrica y viabilidad relacional que introduce la función objetivo \eqref{fitness_eq}.
+
+
+\subsubsection{Esfuerzo computacional y convergencia}
+
+\noindent El análisis de las evaluaciones consumidas revela dinámicas de convergencia muy distintas. El algoritmo de Búsqueda Aleatoria, por diseño, agota sistemáticamente el presupuesto máximo de $100000$ evaluaciones. El algoritmo Greedy, por su parte, realiza una única evaluación constructiva, siendo extremadamente rápido (esto se refleja en cualquiera de las tablas, por ejemplo en Cuadro \ref{tab_bupa30}, comparado con los otros dos algoritmos).
+
+El comportamiento más destacable reside en la \textit{Búsqueda Local} y su convergencia. Aunque dispone del mismo límite de $100000$ evaluaciones que el aleatorio, casi nunca lo agota (si bien se queda cerca en el Cuadro \ref{tab_bupa30}). En el conjunto \texttt{zoo\_set} ($k=30$) el algoritmo converge en solamente $14000$ evaluaciones, como muestra el Cuadro \ref{tab_zoo15}. Esta rápida detención sugiere que el espacio de búsqueda en este dataset cuenta con óptimos locales muy profundos o vecindarios altamente restrictivos que impiden seguir explorando rápidamente, ahorrando tiempo de cómputo.
+
+
+\subsubsection{Comparación entre conjuntos de datos y dimensionalidad}
+
+\noindent El comportamiento de los algoritmos también varía en función del conjunto de datos considerado. En el caso de \texttt{bupa\_set} y \texttt{glass\_set}, la diferencia entre los algoritmos es más pronunciada, observándose una mejora clara al pasar de Búsqueda Aleatoria a Búsqueda Local.
+
+Al evaluar el impacto de la dimensionalidad ($k=15$ frente a $k=30$), observamos dos consecuencias a resañar. Por un lado, aumentar el número de clusters mejora (reduce) la desviación intra--cluster en la Búsqueda Local; geométricamente, disponer de más centroides facilita que cualquier instancia esté cerca de uno de ellos. 
+
+Por otro lado, el incremento del número de clusters tiende a aumentar la dificultad del problema. Esto se observa especialmente en el incremento del número de restricciones violadas, lo que repercute directamente en el valor final de la función objetivo. En el \texttt{zoo\_set}, la Búsqueda Local pasa de tener un infeasibility de $5.62$ con $k=15$ a acumular $17.28$ restricciones violadas con $k=30$, como reflejan los Cuadros \ref{tab_zoo15} y \ref{tab_zoo30}.
+
+
+\subsubsection{Análisis de la variabilidad de los resultados}
+
+\noindent Como ya hemos comentado, con el objetivo de analizar la estabilidad de los algoritmos evaluados, cada uno de ellos se ejecutó 10 veces para cada combinación de dataset y número de clusters. A partir de estas ejecuciones se construyeron los \textit{boxplots}, que permiten visualizar la distribución de los valores de \textit{fitness}, así como su dispersión, rango intercuartílico y la posible presencia de valores atípicos (\textit{outliers}).
+
+\paragraph{Dataset \texttt{bupa\_set}}
+
+\noindent En la Figura \ref{fig:bupa_var} se muestra la distribución del \textit{fitness} para los tres algoritmos en el dataset \texttt{bupa\_set} para ambos valores de $k$.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.495\textwidth]{../softwareP1/graficas/boxplot_bupa_set_k15_all.png}
+	\includegraphics[width=0.495\textwidth]{../softwareP1/graficas/boxplot_bupa_set_k30_all.png}
+	\vspace{-20pt}  % Reduce 20 puntos el espacio
+	\caption{\small Distribución del fitness para el dataset \textit{Bupa} con $k=15$ (izq) y $k=30$ (dcha)}
+	\label{fig:bupa_var}
+\end{figure}
+
+En ambos casos se observa una dispersión reducida en los resultados, lo que indica un comportamiento estable entre ejecuciones. El algoritmo \textit{Random} presenta valores de \textit{fitness} consistentemente más altos, mientras que \textit{Greedy} mejora estos resultados de forma sistemática. Por su parte, la \textit{Búsqueda Local} no solo alcanza los mejores valores, sino que además muestra una variabilidad muy baja, lo que indica una convergencia robusta hacia soluciones de calidad independientemente de la inicialización.
+
+\paragraph{Dataset \texttt{glass\_set}}
+
+\noindent La Figura \ref{fig:glass_var} muestra la distribución de resultados para el dataset \texttt{glass\_set}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.495\textwidth]{../softwareP1/graficas/boxplot_glass_set_k15_all.png}
+	\includegraphics[width=0.495\textwidth]{../softwareP1/graficas/boxplot_glass_set_k30_all.png}
+	\vspace{-10pt}  % Reduce 10 puntos el espacio
+	\caption{\small Distribución del fitness para el dataset \textit{Glass} con $k=15$ (izq) y $k=30$ (dcha)}
+	\label{fig:glass_var}
+\end{figure}
+
+Para $k=15$ se observa un comportamiento similar al descrito anteriormente: las distribuciones son relativamente compactas y existe una clara mejora al pasar de \textit{Búsqueda Aleatoria} a \textit{Búsqueda Local}. 
+
+Sin embargo, para $k=30$ el comportamiento del algoritmo \textit{Greedy} cambia drásticamente. En este caso aparecen valores extremadamente elevados de \textit{fitness}, ya analizados en la subsección anterior, que están asociados a penalizaciones debidas a configuraciones estructuralmente problemáticas (clusters vacíos). Estos valores distorsionan la escala del eje vertical e impiden observar con claridad la distribución de los resultados de los otros algoritmos.
+
+Para facilitar el análisis de la variabilidad entre \textit{Búsqueda Aleatoria} y \textit{Búsqueda Local}, se incluye en la Figura \ref{fig:glass_zoom} una representación ampliada donde únicamente se comparan estos dos métodos.
+
+En esta representación se observa que \textit{Búsqueda Loca} mejora de forma clara y consistente a \textit{Búsqueda Aleatoria}, sin solapamiento entre distribuciones. Además, ambos algoritmos presentan baja dispersión, lo que indica estabilidad, aunque con diferencias muy significativas en la calidad de las soluciones.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.55\textwidth]{../softwareP1/graficas/boxplot_glass_set_k30_zoom.png}
+	\vspace{-10pt}  % Reduce 20 puntos el espacio
+	\caption{\small Comparación ampliada entre Búsqueda Aleatoria y Búsqueda Local para \textit{glass\_set} con $k=30$}
+	\label{fig:glass_zoom}
+\end{figure}
+
+\paragraph{Dataset \texttt{zoo\_set}}
+
+\noindent Finalmente, la Figura \ref{fig:zoo_var} muestra los resultados correspondientes al dataset \texttt{zoo\_set}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.495\textwidth]{../softwareP1/graficas/boxplot_zoo_set_k15_all.png}
+	\includegraphics[width=0.495\textwidth]{../softwareP1/graficas/boxplot_zoo_set_k30_all.png}
+	\vspace{-10pt}
+	\caption{\small Distribución del fitness para el dataset \textit{Zoo} con $k=15$ (izq) y $k=30$ (dcha)}
+	\label{fig:zoo_var}
+\end{figure}
+
+En este dataset se observa nuevamente la aparición de valores extremos en el algoritmo \textit{Greedy}. Para $k=15$, este comportamiento se manifiesta en un único outlier muy elevado, mientras que para $k=30$ la dispersión es mucho mayor y afecta a un número significativo de ejecuciones. En ambos casos, estos valores están asociados a penalizaciones por configuraciones inválidas, lo que evidencia una falta de robustez del método constructivo.
+
+Para analizar adecuadamente el comportamiento del resto de algoritmos, se presentan en la Figura \ref{fig:zoo_zoom} las correspondientes versiones ampliadas.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.495\textwidth]{../softwareP1/graficas/boxplot_zoo_set_k15_zoom.png}
+	\includegraphics[width=0.495\textwidth]{../softwareP1/graficas/boxplot_zoo_set_k30_zoom.png}
+	\vspace{-20pt}  % Reduce 20 puntos el espacio
+	\caption{\small Comparación ampliada entre Búsqueda Aleatoria y Búsqueda Local para \textit{zoo\_set} con $k=15$ (izq) y $k=30$ (dcha)}
+	\label{fig:zoo_zoom}
+\end{figure}
+
+Estas gráficas permiten observar con claridad que la \textit{Búsqueda Local} obtiene valores de \textit{fitness} considerablemente menores que la \textit{Búsqueda Aleatoria} en ambas configuraciones. Aunque se aprecia una ligera dispersión en los resultados del algoritmo de mejora local, todos ellos se mantienen dentro de rangos claramente superiores en calidad respecto a los obtenidos mediante soluciones completamente aleatorias.
+
+En conjunto, el análisis de los \textit{boxplots} confirma que las mejoras observadas en los valores medios de \textit{fitness} no dependen de ejecuciones aisladas, sino que se mantienen de forma consistente a lo largo de las distintas repeticiones experimentales. Esto refuerza la conclusión de que la \textit{Búsqueda Local} no solo produce mejores soluciones en promedio, sino que además presenta un comportamiento robusto frente a la variabilidad inherente a la inicialización aleatoria, mientras que \textit{Greedy} presenta una alta sensibilidad a la estructura del problema, lo que puede derivar en soluciones muy degradadas en determinados escenarios.
+
+
+\subsubsection{Conclusiones del análisis}
+\noindent A partir de los resultados obtenidos, se puede concluir que la \textit{Búsqueda Local} es el método más eficaz entre los algoritmos evaluados para el problema de clustering con restricciones considerado. Su capacidad para mejorar iterativamente soluciones iniciales le permite encontrar configuraciones de clusters mayor calidad, logrando un mejor equilibrio entre la desviación intra--cluster y el cumplimiento de las restricciones.
+
+Por su parte, la \textit{Búsqueda Aleatoria} actúa como una referencia base, mostrando un comportamiento estable pero limitado, debido a la ausencia de mecanismos de explotación del espacio de soluciones. 
+
+Finalmente, el algoritmo \textit{Greedy} presenta un comportamiento dependiente del contexto. Aunque puede generar soluciones factibles de forma muy eficiente, especialmente en escenarios donde el tamaño del dataset es suficientemente grande en relación con el número de clusters ($n \gg k$), pero su naturaleza constructiva lo hace más susceptible a generar configuraciones poco adecuadas en determinados conjuntos de datos.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\subsection{Contraste de Hipótesis mediante el Test de Wilcoxon}
+
+\noindent A lo largo del análisis previo, la inspección visual de los \textit{boxplots} y los valores promedio ha sugerido una clara superioridad del algoritmo de \textit{Búsqueda Local} frente a la \textit{Búsqueda Aleatoria}. No obstante, con el fin de dotar a esta comparación de mayor rigor estadístico, se ha realizado un contraste de hipótesis.
+
+Dado que ambos algoritmos han sido evaluados bajo condiciones emparejadas (utilizando las mismas $10$ semillas aleatorias en cada experimento) y que no puede asumirse \textit{a priori} la normalidad de las distribuciones del \textit{fitness}, no resulta apropiado aplicar un test paramétrico como el test de Student. En su lugar, se ha empleado el \textbf{test de los rangos signados de Wilcoxon}, que es un test no paramétrico.
+
+Las hipótesis consideradas son:
+\begin{itemize}
+	\item \textbf{Hipótesis nula ($H_0$):} No existen diferencias significativas entre las medianas del \textit{fitness} obtenido por la Búsqueda Aleatoria y la Búsqueda Local.
+	\item \textbf{Hipótesis alternativa ($H_1$):} La Búsqueda Local obtiene valores de \textit{fitness} significativamente menores que la Búsqueda Aleatoria.
+\end{itemize}
+
+Para la realización del contraste se ha desarrollado un \textit{script} en Python utilizando la librería \texttt{scipy.stats}. El test se ha aplicado de forma independiente para cada conjunto de datos (\textit{Bupa, Glass, Zoo}) y para cada valor de $k$ ($15$ y $30$), fijando un nivel de significación $\alpha = 0.05$. Los resultados obtenidos son los siguientes:
+
+\begin{verbatim}
+RESULTADOS DEL TEST DE WILCOXON (RandomSearch vs LocalSearch)
+------------------------------------------------------------
+Dataset: data/bupa_set   | k: 15 | p-valor: 9.766e-04
+Diferencia significativa (LocalSearch es estadísticamente mejor)
+
+Dataset: data/bupa_set   | k: 30 | p-valor: 9.766e-04
+Diferencia significativa (LocalSearch es estadísticamente mejor)
+	
+Dataset: data/glass_set  | k: 15 | p-valor: 9.766e-04
+Diferencia significativa (LocalSearch es estadísticamente mejor)
+	
+Dataset: data/glass_set  | k: 30 | p-valor: 9.766e-04
+Diferencia significativa (LocalSearch es estadísticamente mejor)
+	
+Dataset: data/zoo_set    | k: 15 | p-valor: 9.766e-04
+Diferencia significativa (LocalSearch es estadísticamente mejor)
+	
+Dataset: data/zoo_set    | k: 30 | p-valor: 9.766e-04
+Diferencia significativa (LocalSearch es estadísticamente mejor)
+\end{verbatim}
+
+\subsubsection*{Interpretación y conclusiones del contraste}
+
+\noindent En todos los escenarios analizados, los \textit{p-valores} obtenidos mediante el test de Wilcoxon son claramente inferiores al nivel de significación establecido ($p \approx 9.77 \times 10^{-4} < 0.05$). Por tanto, los datos aportan evidencia para rechazar la hipótesis nula ($H_0$) en favor de la hipótesis alternativa ($H_1$).
+
+Un aspecto relevante es que el mismo \textit{p-valor} aparece en todos los casos. Esto no es casual, sino consecuencia del tamaño de la muestra ($N=10$ pares) y del hecho de que el algoritmo de \textit{Búsqueda Local} obtiene sistemáticamente mejores resultados que la \textit{Búsqueda Aleatoria} en todas las comparaciones emparejadas. En estas condiciones, el test de Wilcoxon alcanza su valor mínimo posible, que viene dado por $1/2^{10} = 1/1024 \approx 9.77 \times 10^{-4}$.
+
+Este resultado indica que la probabilidad de observar una mejora tan consistente bajo la hipótesis nula es extremadamente baja. En consecuencia, puede concluirse que la superioridad de la \textit{Búsqueda Local} frente a la \textit{Búsqueda Aleatoria} no solo es apreciable desde el punto de vista empírico, sino que también resulta estadísticamente significativa en todos los escenarios analizados.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Referencias y recursos utilizados}
+
+Para la realización de esta práctica y la elaboración de la presente memoria, se han consultado y utilizado los siguientes recursos:
+
+\begin{itemize}
+	\item \textbf{Material de la asignatura:} Diapositivas, guión de prácticas y recursos de PRADO.
+	
+	\item \textbf{Herramientas de Inteligencia Artificial:} Se ha hecho uso de herramientas de IA generativa como apoyo en tareas de programación y redacción. En concreto, se han empleado para:
+	\begin{itemize}
+		\item Resolver dudas puntuales de sintaxis en C++ y mejorar la organización del archivo \texttt{Makefile}.
+		\item Desarrollar el script de Python (\texttt{graf.py}), utilizando las librerías \texttt{pandas}, \texttt{matplotlib} y \texttt{seaborn}, para la generación automatizada de gráficos (\textit{boxplots}) y el procesamiento de los datos almacenados en archivos \texttt{.csv}.
+		\item Asistir en el formateo, revisión y estructuración del documento final en \LaTeX.
+	\end{itemize}
+	
+	\item Documentación oficial de C++ (\href{https://cppreference.com}{\textit{cppreference.com}}) para el manejo de estructuras de datos estándar, y documentación oficial de las librerías de Python empleadas para la visualización de datos.
+	
+	\item Para la realización del análisis estadístico de los resultados, en la aplicación del test de hipótesis de Wilcoxon, se ha utilizado el material de la asignatura \textit{Inferencia Estadística},  dentro de la parte de Matemáticas del doble grado.
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
